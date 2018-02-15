@@ -8,23 +8,45 @@ It is supported by the data package [BrudleData](https://github.com/andrewholdin
 
 ## Quick Start
 
-Below is a quick example that will generate a normalised MA plot, the only prerequisite is to either install the package first, either from CRAN as described above or directly from this repository. Note the parameter for the Brundle function "0.6616886" is only required for this example as the BAM files are not included, typically it is not needed. 
+Below is a quick example that will generate a normalised MA plot.
 
-```
+```R
+# Install Package
+library(devtools)
+install_github("andrewholding/Brundle")
+# You may also need to install packages from BioConductor e.g. DiffBind
+
+# Load package
 library(Brundle)
+
+# Load Example Diffbind Object
 data(dbaExperiment,package="Brundle")
 data(dbaControl,package="Brundle")
-fpath <- system.file("extdata", "samplesheet_SLX14438_hs_ER_DBA.csv",package="Brundle")
-jg.ExperimentSampleSheet<-fpath
-fpath <- system.file("extdata", "samplesheet_SLX14438_hs_CTCF_DBA.csv",package="Brundle")
-jg.ControlSampleSheet<-fpath
 
-dba<-Brundle(dbaExperiment,dbaControl,"Fulvestrant","none",
-    jg.ExperimentSampleSheet,jg.ControlSampleSheet,0.6616886)
+# Load Example Samplesheets
+exptCSV <- system.file("extdata", "samplesheet_SLX14438_hs_ER_DBA.csv",   package="Brundle")
+ctrlCSV <- system.file("extdata", "samplesheet_SLX14438_hs_CTCF_DBA.csv", package="Brundle")
+jg.ExperimentSampleSheet<-exptCSV
+jg.ControlSampleSheet<-ctrlCSV
 
-#Then analyse the normalised Diffbind object as normal
+
+# Normalise with Brundle
+jg.experimentPeaksetNormalised<-Brundle(dbaExperiment,
+                                        dbaControl,
+                                        "Fulvestrant",
+                                        "none",
+                                        jg.ExperimentSampleSheet,
+                                        jg.ControlSampleSheet,
+                                        jg.noBAMs=TRUE
+                                        )
+
+# Insert data back into DiffBind object
+dba <- DiffBind:::pv.resetCounts(dbaExperiment, jg.experimentPeaksetNormalised)
+
+# Process with DiffBind as normal
 dba<-dba.analyze(dba)
-dba.plotMA(dba, bFlip=TRUE)
+dba.plotMA(dba, bFlip=TRUE, bSmooth=FALSE)
+
 ```
 ## Workflow
 
